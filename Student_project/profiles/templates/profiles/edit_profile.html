@@ -1,0 +1,311 @@
+{% extends "main/Layout.html" %}
+{% load static %}
+
+{% block title %}
+Edit Profile Form
+{% endblock %}
+
+{% block head_css %}
+<link rel="stylesheet" href="{% static 'css/Layout.css' %}">
+<link rel="stylesheet" href="{% static 'css/social_Icon_list.css' %}">
+<link rel="stylesheet" href="{% static 'css/inputfield.css' %}">
+
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/post_creation_form.css' %}">
+<style>
+    /* input[type="checkbox"][name$="DELETE"] {
+    display: none;
+} */
+.education-form label {
+    color: #70dcc5;   
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container contain">
+    <div class="sidebar">
+        <img src="{% static 'assets/LOGOGREEN.png' %}" alt="side image" class="s-img mb-2">
+        <h4 class="mb-4">Complete Your Profile</h4>
+        <ul class="stepsss">
+            <li id="step1Sidebar" data-step="1" class="active">Personal Information</li>
+            <li id="step2Sidebar" data-step="2">Professional Information</li>
+            {% if request.user.role == 'candidate' %}
+            <li id="step3Sidebar" data-step="3">Educational Information</li>
+            {% endif %}
+            <li id="step4Sidebar" data-step="4">Address Information</li>
+            <li id="step5Sidebar" data-step="5">Finalize</li>
+            <div class="progress">
+                <div class="indicator"></div>
+            </div>
+        </ul>
+    </div>
+
+    <div class="form-content">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% if messages %}
+                {% for message in messages %}
+                    {% if 'edit_profile' in message.tags %}
+                        <div class="alert {{ message.tags }}">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            
+            <!-- Step 1: Personal Information -->
+            <div id="step1" class="step active">
+                <h1>Personal Information</h1>
+                <div class="form-group position-relative mb-3">
+                    {% if form.profile_image.value %}
+                        <img id="profileImagePreview" src="{{ form.profile_image.value.url }}" alt="Profile Image" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px;">
+                    {% elif user_profile.profile_image %}
+                        <img id="profileImagePreview" src="{{ user_profile.profile_image.url }}" alt="Profile Image" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px;">
+                    {% else %}
+                        <img id="profileImagePreview" src="{% static 'assets/requiter2.jpg' %}" alt="Default Profile Image" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px;">
+                    {% endif %}
+                    {{ form.profile_image }}
+                    <label class="user-label" for="profile_image">Profile Image</label>
+                </div>
+                {% if request.user.role == 'candidate' %}
+                <div class="form-group position-relative mb-3">
+                    {{ form.dob }}
+                    <label class="user-label" for="dob">Date of Birth</label>
+                </div>
+                {% endif %}
+            </div>
+
+            
+            <!-- Step 2: Professional Information -->
+            <div id="step2" class="step">
+                <h1>Professional Information</h1>
+                <div class="form-group position-relative mb-3">
+                    {{ form.position }}
+                    <label class="user-label" for="position">Position</label>
+                </div>
+                {% if request.user.role == 'candidate' %}
+                <div class="form-group position-relative mb-3">
+                    {{ form.experience }}
+                    <label class="user-label" for="experience">Experience</label>
+                </div>
+                <div class="form-group position-relative mb-3">
+                    {{ form.current_company }}
+                    <label class="user-label" for="skills">Current Company</label>
+                </div>
+                <div class="form-group position-relative mb-3">
+                    {{ form.current_company_position }}
+                    <label class="user-label" for="skills">Current Company Position</label>
+                </div>
+                <div class="form-group position-relative mb-3">
+                    {{ form.current_company_start_date }}
+                    <label class="user-label" for="skills">Current Company Start Date</label>
+                </div>
+                <div class="form-group position-relative mb-3">
+                    {{ form.previous_company }}
+                    <label class="user-label" for="skills">Previous Company</label>
+                </div>
+                <div class="form-group position-relative mb-3">
+                    {{ form.previous_company_position }}
+                    <label class="user-label" for="skills">Previous Company Position</label>
+                </div>
+                <div class="form-group position-relative mb-3">
+                    {{ form.previous_company_start_date }}
+                    <label class="user-label" for="skills">Previous Company Start Date</label>
+                </div>
+                <div class="form-group position-relative mb-3">
+                    {{ form.previous_company_end_date }}
+                    <label class="user-label" for="skills">Previous Company End Date</label>
+                </div>
+                <div class="form-group position-relative mb-3">
+                    {{ form.skills }}
+                    <label class="user-label" for="skills">Skills</label>
+                </div>
+                <div class="form-group position-relative mb-3">
+                    {{ form.preferred_location }}
+                    <label class="user-label" for="skills">Preferred Location</label>
+                </div>
+                <div class="form-group position-relative mb-3">
+                    {{ form.current_salary }}
+                    <label class="user-label" for="skills">Current Salary</label>
+                </div>
+                <div class="form-group position-relative mb-3">
+                    {{ form.expected_salary }}
+                    <label class="user-label" for="skills">Expected Salary</label>
+                </div>                
+                <div class="form-group position-relative mb-3">
+                    {{ form.resume }}
+                    <label class="user-label" for="resume">Upload Resume</label>
+                </div>
+                <div class="form-group position-relative mb-3">
+                    {{ form.career_objective }}
+                </div>                
+                {% endif %}
+            </div>
+
+            {% if request.user.role == 'candidate' %}
+                <!-- Step 3: Educational Information -->
+                <div id="step3" class="step">
+                    <h1>Educational Information</h1>
+                    {% csrf_token %}
+                    {{ education_formset.management_form }}
+                    <div id="education-forms">
+                        {% for form in education_formset %}
+                        <div class="form-group position-relative mb-3 education-form">
+                            {{ form.as_p }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" id="add-education-btn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Another Education
+                    </button> 
+                    
+                    <button type="button" class="btn btn-danger remove-education-btn">
+                        <i class="fas fa-trash-alt"></i> Remove
+                    </button>
+                </div>   
+            {% endif %}
+
+            <!-- Step 4: Address Information -->
+            <div id="step4" class="step">
+                <h1>Address Information</h1>
+                <div class="form-group position-relative mb-3">
+                    {{ form.country }}
+                </div>
+                <div class="form-group position-relative mb-3">
+                    {{ form.state }}
+                    <label class="user-label" for="state">State</label>
+                </div>
+                <div class="form-group position-relative mb-3">
+                    {{ form.city }}
+                    <label class="user-label" for="city">City</label>
+                </div>
+                <div class="form-group position-relative mb-3">
+                    {{ form.address }}
+                    <label class="user-label" for="address">Address</label>
+                </div>
+                <div class="form-group position-relative mb-3">
+                    {{ form.postal_code }}
+                    <label class="user-label" for="postal_code">Postal Code</label>
+                </div>
+            </div>
+
+            <!-- Step 5: Final Step -->
+            <div id="step5" class="step">
+                <h2 class="text-center">You have successfully <span>updated your profile</span></h2>
+                <p class="text-center mt-4"><a href="{% url 'profile' %}">Back to profile page</a></p>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="nav-buttons">
+                <button type="button" class="btn " id="prevBtn" onclick="nextPrev(-1)">Previous</button>
+                <button type="button" class="btn " id="nextBtn" onclick="nextPrev(1)">Next</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{%endblock %}
+
+{% block extra_js %}
+<script>
+    var currentStep = 0;
+    showStep(currentStep);
+    
+    function showStep(step) {
+        var steps = document.getElementsByClassName("step");
+        steps[step].style.display = "block";
+        updateProgress(step);
+    
+        if (step === 0) {
+            document.getElementById("prevBtn").style.display = "none";
+        } else {
+            document.getElementById("prevBtn").style.display = "inline";
+        }
+    
+        if (step === steps.length - 1) {
+            document.getElementById("nextBtn").innerHTML = "Submit";
+        } else {
+            document.getElementById("nextBtn").innerHTML = "Next";
+        }
+    }
+    
+    function nextPrev(stepChange) {
+        var steps = document.getElementsByClassName("step");
+        steps[currentStep].style.display = "none";
+        currentStep += stepChange;
+    
+        if (currentStep >= steps.length) {
+            document.forms[0].submit();
+            return false;
+        }
+        showStep(currentStep);
+    }
+    
+    function updateProgress(step) {
+        var totalSteps = document.getElementsByClassName("step").length;
+        var progress = ((step + 1) / totalSteps) * 100;
+        document.querySelector(".indicator").style.height = progress + "%";
+    
+        var sidebarSteps = document.querySelectorAll(".sidebar ul li");
+        sidebarSteps.forEach((li, index) => {
+            li.classList.remove("completed", "active");
+            if (index < step) li.classList.add("completed");
+            if (index === step) li.classList.add("active");
+        });
+    }
+    
+    document.addEventListener("DOMContentLoaded", function () {
+        const educationFormsContainer = document.getElementById("education-forms");
+        const totalForms = document.querySelector("#id_form-TOTAL_FORMS");
+    
+        document.getElementById("add-education-btn").addEventListener("click", function () {
+            let formIdx = parseInt(totalForms.value);
+            let newForm = educationFormsContainer.children[0].cloneNode(true);
+    
+            newForm.querySelectorAll("input, select, textarea").forEach(function (input) {
+                input.name = input.name.replace(/-\d+-/, `-${formIdx}-`);
+                input.id = input.id.replace(/-\d+-/, `-${formIdx}-`);
+                input.value = "";
+            });
+    
+            // Add a remove button to the cloned form
+            let removeBtn = document.createElement("button");
+            removeBtn.type = "button";
+            removeBtn.classList.add("btn", "btn-danger", "remove-education-btn");
+            removeBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Remove';
+            removeBtn.style.marginTop = "10px";
+    
+            newForm.appendChild(removeBtn);
+            educationFormsContainer.appendChild(newForm);
+            totalForms.value = formIdx + 1;
+    
+            updateRemoveButtons();
+        });
+    
+        function updateRemoveButtons() {
+            let removeButtons = document.querySelectorAll(".remove-education-btn");
+            removeButtons.forEach(button => button.style.display = "inline");
+    
+            // Hide remove button if only one form exists
+            if (removeButtons.length === 1) removeButtons[0].style.display = "none";
+        }
+    
+        document.addEventListener("click", function (event) {
+            if (event.target.closest(".remove-education-btn")) {
+                let educationForms = document.querySelectorAll(".education-form");
+                if (educationForms.length > 1) {
+                    event.target.closest(".education-form").remove();
+                    totalForms.value = document.querySelectorAll(".education-form").length;
+                }
+                updateRemoveButtons();
+            }
+        });
+    
+        updateRemoveButtons();
+    });
+    
+    
+
+</script>
+{% endblock %}
